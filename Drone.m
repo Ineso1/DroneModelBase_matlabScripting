@@ -23,6 +23,8 @@ classdef Drone < DroneDynamic
         kd_torque_2
         max_thrust
         max_torque
+
+        UDE_obs
     end
     methods
         function obj = Drone(mass, q, x0, y0, z0, dt)
@@ -31,7 +33,7 @@ classdef Drone < DroneDynamic
             obj.q_d = quaternion(1, 0, 0, 0);
             obj.ep = [0; 0; 0;];
             obj.eq = obj.q;
-
+            
             % Initialize control vars and consts
             obj.u_thrust = [0; 0; 0];
             obj.u_torque = [0; 0; 0];
@@ -43,6 +45,9 @@ classdef Drone < DroneDynamic
             obj.kd_torque_2 = 0;
             obj.max_thrust = 10;
             obj.max_torque = 10;
+            
+            % Observer
+            obj.UDE_obs = UDE(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
         end
 
         function obj = setControlGains(obj, kp_thrust, kd_thrust_1, kd_thrust_2, kp_torque, kd_torque_1, kd_torque_2)
@@ -59,6 +64,8 @@ classdef Drone < DroneDynamic
         end
 
         function obj = applyControl(obj)
+
+            obj.UDE_obs.calculateStateUDE_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
 
             % Translational control
             obj.ep = obj.p_d - obj.p;
@@ -109,6 +116,8 @@ classdef Drone < DroneDynamic
             obj.dx_state_rot(:, obj.iterations + 1) = obj.dx_sys_rot;
             obj.time_array(obj.iterations + 1) = obj.iterations * obj.dt;
             obj = obj.updateDisturbanceArray(obj.disturbance_trans, obj.disturbance_rot);
+            obj.disturbance_measure_trans(:,obj.iterations + 1) = obj.UDE_obs.w_hat_trans;
+            obj.disturbance_measure_rot(:,obj.iterations + 1) = obj.UDE_obs.w_hat_rot;
         end
 
         function obj = setDisturbance(obj, disturbance_vector_trans, disturbance_vector_rot)
