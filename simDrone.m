@@ -16,6 +16,7 @@
 
 % % Create TrajectoryFollower drone
 % drone = TrajectoryFollower(mass, q, x0, y0, z0, dt, trajectory_type, trajectory_params);
+% drone.obs_num = 2;
 % drone = drone.setControlGains(4, 1, 2, 20, 2, 6);
 
 % drone = drone.generateTrajectory(sim_time);
@@ -47,6 +48,7 @@ sim_time = 8; % seconds
 iterations = sim_time / dt;
 
 drone = Drone(mass, q, x0, y0, z0, dt);
+drone.obs_num = 2;
 drone = drone.setControlGains(4, 1, 2, 20, 2, 6);
 drone = drone.setAimPoint(1, 2, 3);
 drone = drone.setDisturbance([0; 0; 0], [0; 0; 0]);
