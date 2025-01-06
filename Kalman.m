@@ -31,7 +31,7 @@ end
             obj.Xk;
         end
 
-        function obj = KalmanFC(X,Uk, i)
+        function obj = KalmanFC(X, Uk, i)
         %%%%%%%%%%%%%%%%%%%%%%%% Extended Kalman Filter %%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%%%%%%%%%%%%%%%% In case of losing data %%%%%%%%%%%%%%%%%%%%%%%%%%%
             if X(:,i)==0
@@ -41,9 +41,9 @@ end
                 obj.Rk = [1 0 0;0 1 0;0 0 1]*1e10;
             else
                 %Covariance associated with the noise
-                obj.Qk = eye(6)*15;
+                obj.Qk = eye(6)*1.5;
                 %Variance associated
-                obj.Rk = eye(3)*20;
+                obj.Rk = eye(3)*25;
             end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % %Covariance associated with the noise
