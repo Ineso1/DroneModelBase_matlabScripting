@@ -75,11 +75,11 @@ end
             %Keep measurement
             Zk = Hk*X(:,i);
             %Keep value estimated from X,Y,Theta
-            Zest = Xk(:,i+1);
+            Zest = Hk*Xk(:,i+1);
             %The estimated measure taking into account the prediction
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% UPDATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %Innovation on measurement pre-fit residual
-            Yk = Zk - Hk*Zest;  % La diferencia completa de las observaciones
+            Yk = Zk - Zest;  % La diferencia completa de las observaciones
             %Innovation covariance
             Sk = Hk*obj.Pk*Hk'+obj.Rk;
             %Optimal Kalman gain
