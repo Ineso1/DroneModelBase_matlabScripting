@@ -18,20 +18,20 @@ classdef Kalman < ObserverBase & handle
 end
 
     methods
-
-        function obj = Kalman_def(mass, J, p_0, dp_0, q_0, omega_0,P,Q,R)
+        function obj = Kalman(mass, J, p_0, dp_0, q_0, omega_0)
             obj@ObserverBase(mass, J, p_0, dp_0, q_0, omega_0);
             obj.Fk = obj.A_trans;
             obj.Bk = obj.B_trans;
 
             % Initialize control vars and consts
-            obj.Pk = eye(6)*obj.P;
-            obj.Rk= eye(3)*obj.R;
-            obj.Qk = eye(6)*obj.Q;
+            obj.Pk = eye(6)*10;
+            obj.Qk = eye(6)*1.5;
+            obj.Rk= eye(6)*25;
+            obj.Hk = eye(6);
+            obj.Xk;
         end
 
-
-        function obj = Kalman(X,Hk,Uk,Zk,i)
+        function obj = KalmanFC(X,Uk,Zk,i)
         %%%%%%%%%%%%%%%%%%%%%%%% Extended Kalman Filter %%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%%%%%%%%%%%%%%%% In case of losing data %%%%%%%%%%%%%%%%%%%%%%%%%%%
             if X(:,i)==0
@@ -41,9 +41,9 @@ end
                 obj.Rk = [1 0 0;0 1 0;0 0 1]*1e10;
             else
                 %Covariance associated with the noise
-                obj.Qk = eye(6)*obj.Q;
+                obj.Qk = eye(6)*15;
                 %Variance associated
-                obj.Rk = eye(3)*obj.R;
+                obj.Rk = eye(3)*20;
             end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % %Covariance associated with the noise
@@ -65,7 +65,7 @@ end
 
         %%%%%%%%%%%%%%%%%%%%% Update state from X,Y,Theta %%%%%%%%%%%%%%%%%%%%%%%%%
             %Update the next X
-            Xk(:,i+1) = obj.Fk * X(:,i) + obj.Bk * Uk;
+            obj.Xk(:,i+1) = obj.Fk * X(:,i) + obj.Bk * Uk;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PREDICT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,7 +75,7 @@ end
             %Keep measurement
             Zk = Hk*X(:,i);
             %Keep value estimated from X,Y,Theta
-            Zest = Hk*Xk(:,i+1);
+            Zest = Hk*obj.Xk(:,i+1);
             %The estimated measure taking into account the prediction
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% UPDATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %Innovation on measurement pre-fit residual
@@ -85,13 +85,15 @@ end
             %Optimal Kalman gain
             Kk = obj.Pk*Hk'*inv(Sk);
             %Update state estimate
-            Xk(:,i+1) = Xk(:,i+1) + Kk*Yk;
+            obj.Xk(:,i+1) = Xk(:,i+1) + Kk*Yk;
             %Updated estimated covariance
             obj.Pk = (eye(length(Hk)) - Kk*Hk)*obj.Pk;
 
             %
             sigmax(i)=sqrt(Pk(1,1));
             obj@ObserverBase()
+
+
         end
 
     end
