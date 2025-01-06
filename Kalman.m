@@ -31,7 +31,7 @@ end
             obj.Xk;
         end
 
-        function obj = KalmanFC(X,Uk,Zk,i)
+        function obj = KalmanFC(X,Uk, i)
         %%%%%%%%%%%%%%%%%%%%%%%% Extended Kalman Filter %%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%%%%%%%%%%%%%%%%%%%% In case of losing data %%%%%%%%%%%%%%%%%%%%%%%%%%%
             if X(:,i)==0
