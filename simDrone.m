@@ -70,9 +70,10 @@ for i = 1:iterations
     drone = drone.update();
 end
 
+drone.plotFilterPos();
 drone.plotPosition();
-drone.plotErrors();
-drone.plotOrientation();
-drone.plotDisturbance_trans();
-pause(3);
-drone.animateDroneTrajectory();
+%drone.plotErrors();
+%drone.plotOrientation();
+%drone.plotDisturbance_trans();
+%pause(3);
+%drone.animateDroneTrajectory();

@@ -27,7 +27,16 @@ classdef Drone < DroneDynamic
         UDE_obs
         Luenberger_obs
 
+        KalmanFilter
+
         obs_num
+
+        % Gaussian error properties
+        noiseRangeMin
+        noiseRangeMax
+        noiseMean
+        noiseStdDev
+        p_noisy
     end
     methods
         function obj = Drone(mass, q, x0, y0, z0, dt)
@@ -53,6 +62,13 @@ classdef Drone < DroneDynamic
             % Observer
             obj.UDE_obs = UDE(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
             obj.Luenberger_obs = Luenberger(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
+            obj.KalmanFilter = Kalman(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
+
+            obj.noiseRangeMin = -1.5;
+            obj.noiseRangeMax = 1.5;
+            obj.noiseMean = 0;
+            obj.noiseStdDev = 0.1;
+            obj.p_noisy = [0; 0; 0;];
         end
 
         function obj = setControlGains(obj, kp_thrust, kd_thrust_1, kd_thrust_2, kp_torque, kd_torque_1, kd_torque_2)
@@ -75,6 +91,10 @@ classdef Drone < DroneDynamic
             elseif obj.obs_num == 2
             obj.Luenberger_obs.calculateDisturbanceL_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
             end
+
+            noise = obj.generateGaussianError(obj.noiseRangeMin, obj.noiseRangeMax, obj.noiseMean, obj.noiseStdDev);
+            obj.p_noisy = obj.p + noise;
+            obj.KalmanFilter.kalman_estimate(obj.p_noisy, obj.dp, obj.u_thrust);
 
             % Translational control
             obj.ep = obj.p_d - obj.p;
@@ -110,6 +130,8 @@ classdef Drone < DroneDynamic
             obj.ep_array(:, obj.iterations + 1) = obj.ep;
             obj.eq_array(:, obj.iterations + 1) = rotvec(obj.eq)';
             obj.p_array(:, obj.iterations + 1) = obj.p;
+            obj.p_array_noisy(:, obj.iterations + 1) = obj.p_noisy;
+            obj.p_hat_array(:, obj.iterations + 1) = obj.KalmanFilter.Xk;
             obj.dp_array(:, obj.iterations + 1) = obj.dp;
             obj.ddp_array(:, obj.iterations + 1) = obj.ddp;
             obj.p_d_array(:, obj.iterations + 1) = obj.p_d;
@@ -138,6 +160,16 @@ classdef Drone < DroneDynamic
             obj.disturbance_trans = disturbance_vector_trans;
             obj.disturbance_rot = disturbance_vector_rot;
         end
+
+        function errorValue = generateGaussianError(obj, rangeMin, rangeMax, meanValue, stdDev)
+            while true
+                value = meanValue + stdDev * randn();
+                if value >= rangeMin && value <= rangeMax
+                    errorValue = value;
+                    return;
+                end
+            end
+        end      
 
         function obj = update(obj)
             obj = obj.applyControl();

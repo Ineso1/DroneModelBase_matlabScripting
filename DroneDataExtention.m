@@ -6,6 +6,8 @@ classdef DroneDataExtention
 
         % Dynamics
         p_array
+        p_array_noisy
+        p_hat_array
         dp_array
         ddp_array
         q_array
@@ -41,6 +43,8 @@ classdef DroneDataExtention
             obj.ep_array = [];
             obj.eq_array = [];
             obj.p_array = [];
+            obj.p_hat_array = [];
+            obj.p_array_noisy = [];
             obj.dp_array = [];
             obj.ddp_array = [];
             obj.q_array = [];
@@ -329,6 +333,40 @@ classdef DroneDataExtention
             title('Disturbance Rot Over Time');
             xlabel('Time (s)');
             ylabel('Disturbance');
+            legend('show');
+            grid on;
+        end
+
+        function plotFilterPos(obj)
+            figure;
+            subplot(2,1,2);
+            plot(obj.time_array, obj.p_hat_array(1,:), 'r--', 'DisplayName', 'estimation X');
+            hold on;
+            plot(obj.time_array, obj.p_hat_array(2,:), 'g--', 'DisplayName', 'estimation Y');
+            plot(obj.time_array, obj.p_hat_array(3,:), 'b--', 'DisplayName', 'estimation Z');
+            
+            plot(obj.time_array, obj.p_array(1,:), 'r-', 'DisplayName', 'drone X');
+            plot(obj.time_array, obj.p_array(2,:), 'g-', 'DisplayName', 'drone Y');
+            plot(obj.time_array, obj.p_array(3,:), 'b-', 'DisplayName', 'drone Z');
+            title('Position estimated');
+            xlabel('Time');
+            ylabel('Position Estimation');
+            legend('show');
+            grid on;
+
+            subplot(2,1,1);
+            plot(obj.time_array, obj.p_array_noisy(1,:), 'r--', 'DisplayName', 'p noisy X');
+            hold on;
+            plot(obj.time_array, obj.p_array_noisy(2,:), 'g--', 'DisplayName', 'p noisy Y');
+            plot(obj.time_array, obj.p_array_noisy(3,:), 'b--', 'DisplayName', 'p noisy Z');
+            
+            plot(obj.time_array, obj.p_hat_array(1,:), 'r-', 'DisplayName', 'estimation X');
+            plot(obj.time_array, obj.p_hat_array(2,:), 'g-', 'DisplayName', 'estimation Y');
+            plot(obj.time_array, obj.p_hat_array(3,:), 'b-', 'DisplayName', 'estimation Z');
+
+            title('Position over Time');
+            xlabel('Time');
+            ylabel('Position');
             legend('show');
             grid on;
         end
