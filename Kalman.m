@@ -1,98 +1,79 @@
 classdef Kalman < ObserverBase & handle
     properties
+        Fk      % State transition matrix (Discrete-time A)
+        Bk      % Input matrix (Discrete-time B)
+        Hk      % Observation matrix (C)
+        Zk      % Measurement vector
 
-    Fk      % State vector  = A
-    Bk      % Input Matrix = B
-    Uk      % input vector = U
-    Hk      % H_k = C = Observation Matrix
-    Zk      % measurement
+        Xk      % State estimate vector
+        Rk      % Measurement noise covariance
+        Qk      % Process noise covariance
+        Pk      % State covariance matrix
+        Sk      % Innovation covariance
+        Kk      % Kalman gain
 
-    Xk      % State Estimate  ------------>Xk(1) = X(1)
-    Rk      % Variance associated
-    Qk      % Covariance associated with noise 
-    Pk      % Covariance matrix
-    Sk      % Innovation covariance
-    Kk      % Kalman gain
-
-
-end
+        dt      % Sampling time
+        firstUpdate % Flag for first update
+    end
 
     methods
-
-        function obj = Kalman_def(mass, J, p_0, dp_0, q_0, omega_0,P,Q,R)
+        % Constructor
+        function obj = Kalman(mass, J, p_0, dp_0, q_0, omega_0)
             obj@ObserverBase(mass, J, p_0, dp_0, q_0, omega_0);
-            obj.Fk = obj.A_trans;
-            obj.Bk = obj.B_trans;
+            obj.dt = 0.01;
 
-            % Initialize control vars and consts
-            obj.Pk = eye(6)*obj.P;
-            obj.Rk= eye(3)*obj.R;
-            obj.Qk = eye(6)*obj.Q;
+            obj.Fk = eye(6) + obj.A_trans * obj.dt + 0.5 * (obj.A_trans * obj.dt)^2; % Discretized A
+            obj.Bk = obj.dt * obj.B_trans; % Discretized B
+            obj.Hk = [eye(6)];    % Observation matrix
+
+            obj.Qk = eye(6) * 1.5; % Process noise covariance
+            obj.Rk = eye(6) * 25;  % Measurement noise covariance
+
+            obj.Pk = diag([60, 60, 60, 60, 60, 60]); % Large initial uncertainty
+
+            obj.Xk = [p_0; dp_0];
+
+            obj.firstUpdate = true;
         end
 
+        % Kalman filter step
+        function obj = kalman_estimate(obj, p, dp, u_thrust)
+            X = [p; dp];
 
-        function obj = Kalman(X,Hk,Uk,Zk,i)
-        %%%%%%%%%%%%%%%%%%%%%%%% Extended Kalman Filter %%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%%%%%%%%%%%%%%%%%%%%%%% In case of losing data %%%%%%%%%%%%%%%%%%%%%%%%%%%
-            if X(:,i)==0
-                %Covariance associated with the noise
-                obj.Qk = [1 0 0;0 1 0;0 0 1]*150;
-                %Variance associated
-                obj.Rk = [1 0 0;0 1 0;0 0 1]*1e10;
+            % Handle missing or invalid measurements
+            if isempty(p) || all(p == 0)
+                obj.Qk = eye(6) * 150; % Increase process noise
+                obj.Rk = eye(6) * 1e10; % High measurement noise
+                X = obj.Xk; % Use previous estimate
+                disp("Missing data: using model prediction");
             else
-                %Covariance associated with the noise
-                obj.Qk = eye(6)*obj.Q;
-                %Variance associated
-                obj.Rk = eye(3)*obj.R;
+                obj.Qk = eye(6) * 1.5; % Moderate process noise
+                obj.Rk = eye(6) * 15;  % Moderate measurement noise
             end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % %Covariance associated with the noise
-            % obj.Qk = [1 0 0;0 1 0;0 0 1]*15;
-            % %Variance associated
-            % obj.Rk = [1 0 0;0 1 0;0 0 1]*20;
-            % 
-            % IF Qk >> Rk The filter relies more on measurements and less on model predictions.
-            % IF Rk >> Qk The filter relies more on model predictions and less on measurements.
 
-            % Qk > Rk
-            %   If my uncertainty in my model at time K > uncertainty in my
-            %   measurement at time K, my measurement will be trusted more than my
-            %   model.
+            %%%%%%%%%%%%%%%%%%%%%%%% PREDICT STEP %%%%%%%%%%%%%%%%%%%%%%%%
+            if obj.firstUpdate && all(dp == 0) && all(u_thrust == 0)
+                obj.Xk = obj.Fk * obj.Xk;
+                obj.firstUpdate = false;
+            else
+                obj.Xk = obj.Fk * obj.Xk + obj.Bk * (u_thrust - [0; 0; obj.g * obj.mass_ObserverBase]);
+            end
+            obj.Pk = obj.Fk * obj.Pk * obj.Fk' + obj.Qk;
 
-            % Qk < Rk
-            %   If my uncertainty in my model at time K < uncertainty in my
-            %   measurement at time K, the model will be trusted more than the measurement.
-
-        %%%%%%%%%%%%%%%%%%%%% Update state from X,Y,Theta %%%%%%%%%%%%%%%%%%%%%%%%%
-            %Update the next X
-            Xk(:,i+1) = obj.Fk * X(:,i) + obj.Bk * Uk;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PREDICT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %Predicted estimate covariance
-            obj.Pk = obj.Fk*obj.Pk*obj.Fk' + obj.Qk;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %Keep measurement
-            Zk = Hk*X(:,i);
-            %Keep value estimated from X,Y,Theta
-            Zest = Hk*Xk(:,i+1);
-            %The estimated measure taking into account the prediction
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% UPDATE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %Innovation on measurement pre-fit residual
-            Yk = Zk - Zest;  % La diferencia completa de las observaciones
-            %Innovation covariance
-            Sk = Hk*obj.Pk*Hk'+obj.Rk;
-            %Optimal Kalman gain
-            Kk = obj.Pk*Hk'*inv(Sk);
-            %Update state estimate
-            Xk(:,i+1) = Xk(:,i+1) + Kk*Yk;
-            %Updated estimated covariance
-            obj.Pk = (eye(length(Hk)) - Kk*Hk)*obj.Pk;
-
-            %
-            sigmax(i)=sqrt(Pk(1,1));
-            obj@ObserverBase()
+            %%%%%%%%%%%%%%%%%%%%%%%% UPDATE STEP %%%%%%%%%%%%%%%%%%%%%%%%%
+            obj.Zk = obj.Hk * X;    
+            Zest = obj.Hk * obj.Xk; 
+            Yk = obj.Zk - Zest;     
+            obj.Sk = obj.Hk * obj.Pk * obj.Hk' + obj.Rk;
+            obj.Kk = obj.Pk * obj.Hk' / obj.Sk;
+            obj.Xk = obj.Xk + obj.Kk * Yk;
+            obj.Pk = (eye(size(obj.Pk)) - obj.Kk * obj.Hk) * obj.Pk;
         end
 
+        % salida chida
+        function [p, dp] = getState(obj)
+            p = obj.Xk(1:3);      % Position estimate
+            dp = obj.Xk(4:6);     % Velocity estimate
+        end
     end
 end
