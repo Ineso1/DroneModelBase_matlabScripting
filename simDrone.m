@@ -71,7 +71,7 @@ for i = 1:iterations
 end
 
 drone.plotFilterPos();
-drone.plotPosition();
+%drone.plotPosition();
 %drone.plotErrors();
 %drone.plotOrientation();
 %drone.plotDisturbance_trans();

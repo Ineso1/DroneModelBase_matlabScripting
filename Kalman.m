@@ -20,7 +20,7 @@ classdef Kalman < ObserverBase & handle
         % Constructor
         function obj = Kalman(mass, J, p_0, dp_0, q_0, omega_0)
             obj@ObserverBase(mass, J, p_0, dp_0, q_0, omega_0);
-            obj.dt = 0.01;
+            obj.dt = 0.01;      % 0.01
 
             obj.Fk = eye(6) + obj.A_trans * obj.dt + 0.5 * (obj.A_trans * obj.dt)^2; % Discretized A
             obj.Bk = obj.dt * obj.B_trans; % Discretized B
@@ -29,7 +29,7 @@ classdef Kalman < ObserverBase & handle
             obj.Qk = eye(6) * 1.5; % Process noise covariance
             obj.Rk = eye(6) * 25;  % Measurement noise covariance
 
-            obj.Pk = diag([60, 60, 60, 60, 60, 60]); % Large initial uncertainty
+            obj.Pk = eye(6) * 60; % Large initial uncertainty
 
             obj.Xk = [p_0; dp_0];
 
@@ -45,10 +45,12 @@ classdef Kalman < ObserverBase & handle
                 obj.Qk = eye(6) * 150; % Increase process noise
                 obj.Rk = eye(6) * 1e10; % High measurement noise
                 X = obj.Xk; % Use previous estimate
+                disp("MAMA ESCUCHO BORROSO!");
                 disp("Missing data: using model prediction");
             else
                 obj.Qk = eye(6) * 1.5; % Moderate process noise
-                obj.Rk = eye(6) * 15;  % Moderate measurement noise
+                obj.Rk = eye(6) * 25;  % Moderate measurement noise
+                disp("ia sirbo pero oygo borrozo!");
             end
 
             %%%%%%%%%%%%%%%%%%%%%%%% PREDICT STEP %%%%%%%%%%%%%%%%%%%%%%%%
