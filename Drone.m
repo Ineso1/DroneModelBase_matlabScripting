@@ -26,6 +26,8 @@ classdef Drone < DroneDynamic
 
         UDE_obs
         Luenberger_obs
+        SuperTwist_obs
+        SlidingMode_obs
 
         KalmanFilter
 
@@ -63,6 +65,8 @@ classdef Drone < DroneDynamic
             obj.UDE_obs = UDE(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
             obj.Luenberger_obs = Luenberger(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
             obj.KalmanFilter = Kalman(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
+            obj.SuperTwist_obs = SuperTwistEstimator(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
+            obj.SlidingMode_obs = SlidingModeEstimator(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
 
             obj.noiseRangeMin = -1.5;
             obj.noiseRangeMax = 1.5;
@@ -90,6 +94,10 @@ classdef Drone < DroneDynamic
             obj.UDE_obs.calculateStateUDE_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
             elseif obj.obs_num == 2
             obj.Luenberger_obs.calculateDisturbanceL_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
+            elseif obj.obs_num == 3
+            obj.SuperTwist_obs.calculateDisturbanceST_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
+            elseif obj.obs_num == 4
+            obj.SlidingMode_obs.calculateDisturbanceSM_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);    
             end
 
             noise = obj.generateGaussianError(obj.noiseRangeMin, obj.noiseRangeMax, obj.noiseMean, obj.noiseStdDev);
@@ -153,6 +161,12 @@ classdef Drone < DroneDynamic
             elseif obj.obs_num == 2
                 obj.disturbance_measure_trans(:,obj.iterations + 1) = obj.Luenberger_obs.w_hat_trans;
                 obj.disturbance_measure_rot(:,obj.iterations + 1) = obj.Luenberger_obs.w_hat_rot;
+            elseif obj.obs_num == 3
+                obj.disturbance_measure_trans(:,obj.iterations + 1) = obj.SuperTwist_obs.w_hat_trans;
+                obj.disturbance_measure_rot(:,obj.iterations + 1) = obj.SuperTwist_obs.w_hat_rot;
+            elseif obj.obs_num == 4
+                obj.disturbance_measure_trans(:,obj.iterations + 1) = obj.SlidingMode_obs.w_hat_trans;
+                obj.disturbance_measure_rot(:,obj.iterations + 1) = obj.SlidingMode_obs.w_hat_rot;
             end
         end
 
