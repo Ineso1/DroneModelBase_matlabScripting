@@ -26,6 +26,8 @@ classdef Drone < DroneDynamic
 
         UDE_obs
         Luenberger_obs
+        SuperTwist_obs
+        SlidingMode_obs
 
         KalmanFilter
 
@@ -63,6 +65,8 @@ classdef Drone < DroneDynamic
             obj.UDE_obs = UDE(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
             obj.Luenberger_obs = Luenberger(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
             obj.KalmanFilter = Kalman(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
+            obj.SuperTwist_obs = SuperTwistEstimator(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
+            obj.SlidingMode_obs = SlidingModeEstimator(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
 
             obj.noiseRangeMin = -1.5;
             obj.noiseRangeMax = 1.5;
@@ -84,16 +88,35 @@ classdef Drone < DroneDynamic
             obj.p_d = [x_d; y_d; z_d];
         end
 
+        function saveNoisyData(obj, filename)
+            % Guardar los datos de p_noisy en un archivo CSV
+            if exist('p_noisy.csv', 'file') == 2
+                % Si el archivo existe, agrega los datos nuevos
+                writematrix(obj.p_noisy', filename, 'WriteMode', 'append');
+            else
+                % Si el archivo no existe, crea uno nuevo
+                writematrix(obj.p_noisy', filename);
+            end
+        end 
+
         function obj = applyControl(obj)
 
             if obj.obs_num == 1
             obj.UDE_obs.calculateStateUDE_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
             elseif obj.obs_num == 2
             obj.Luenberger_obs.calculateDisturbanceL_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
+            elseif obj.obs_num == 3
+            obj.SuperTwist_obs.calculateDisturbanceST_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
+            elseif obj.obs_num == 4
+            obj.SlidingMode_obs.calculateDisturbanceSM_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);    
             end
 
             noise = obj.generateGaussianError(obj.noiseRangeMin, obj.noiseRangeMax, obj.noiseMean, obj.noiseStdDev);
             obj.p_noisy = obj.p + noise;
+
+            % Llamada al método para guardar los datos de p_noisy
+            obj.saveNoisyData('p_noisy.csv');
+
             obj.KalmanFilter.kalman_estimate(obj.p_noisy, obj.dp, obj.u_thrust);
 
             % Translational control
@@ -153,6 +176,12 @@ classdef Drone < DroneDynamic
             elseif obj.obs_num == 2
                 obj.disturbance_measure_trans(:,obj.iterations + 1) = obj.Luenberger_obs.w_hat_trans;
                 obj.disturbance_measure_rot(:,obj.iterations + 1) = obj.Luenberger_obs.w_hat_rot;
+            elseif obj.obs_num == 3
+                obj.disturbance_measure_trans(:,obj.iterations + 1) = obj.SuperTwist_obs.w_hat_trans;
+                obj.disturbance_measure_rot(:,obj.iterations + 1) = obj.SuperTwist_obs.w_hat_rot;
+            elseif obj.obs_num == 4
+                obj.disturbance_measure_trans(:,obj.iterations + 1) = obj.SlidingMode_obs.w_hat_trans;
+                obj.disturbance_measure_rot(:,obj.iterations + 1) = obj.SlidingMode_obs.w_hat_rot;
             end
         end
 

@@ -48,7 +48,7 @@ sim_time = 8; % seconds
 iterations = sim_time / dt;
 
 drone = Drone(mass, q, x0, y0, z0, dt);
-drone.obs_num = 2;
+drone.obs_num = 1;
 drone = drone.setControlGains(4, 1, 2, 20, 2, 6);
 drone = drone.setAimPoint(1, 2, 3);
 drone = drone.setDisturbance([0; 0; 0], [0; 0; 0]);
@@ -74,6 +74,6 @@ drone.plotFilterPos();
 drone.plotPosition();
 %drone.plotErrors();
 %drone.plotOrientation();
-%drone.plotDisturbance_trans();
+drone.plotDisturbance_trans();
 %pause(3);
 %drone.animateDroneTrajectory();
