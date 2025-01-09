@@ -88,6 +88,17 @@ classdef Drone < DroneDynamic
             obj.p_d = [x_d; y_d; z_d];
         end
 
+        function saveNoisyData(obj, filename)
+            % Guardar los datos de p_noisy en un archivo CSV
+            if exist('p_noisy.csv', 'file') == 2
+                % Si el archivo existe, agrega los datos nuevos
+                writematrix(obj.p_noisy', filename, 'WriteMode', 'append');
+            else
+                % Si el archivo no existe, crea uno nuevo
+                writematrix(obj.p_noisy', filename);
+            end
+        end 
+
         function obj = applyControl(obj)
 
             if obj.obs_num == 1
@@ -102,6 +113,10 @@ classdef Drone < DroneDynamic
 
             noise = obj.generateGaussianError(obj.noiseRangeMin, obj.noiseRangeMax, obj.noiseMean, obj.noiseStdDev);
             obj.p_noisy = obj.p + noise;
+
+            % Llamada al método para guardar los datos de p_noisy
+            obj.saveNoisyData('p_noisy.csv');
+
             obj.KalmanFilter.kalman_estimate(obj.p_noisy, obj.dp, obj.u_thrust);
 
             % Translational control
