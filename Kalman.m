@@ -45,12 +45,12 @@ classdef Kalman < ObserverBase & handle
                 obj.Qk = eye(6) * 150; % Increase process noise
                 obj.Rk = eye(6) * 1e10; % High measurement noise
                 X = obj.Xk; % Use previous estimate
-                disp("MAMA ESCUCHO BORROSO!");
-                disp("Missing data: using model prediction");
+                %disp("MAMA ESCUCHO BORROSO!");
+                %disp("Missing data: using model prediction");
             else
                 obj.Qk = eye(6) * 1.5; % Moderate process noise
                 obj.Rk = eye(6) * 25;  % Moderate measurement noise
-                disp("ia sirbo pero oygo borrozo!");
+                %disp("ia sirbo pero oygo borrozo!");
             end
 
             %%%%%%%%%%%%%%%%%%%%%%%% PREDICT STEP %%%%%%%%%%%%%%%%%%%%%%%%
