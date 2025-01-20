@@ -30,10 +30,12 @@ classdef UDE < ObserverBase & handle
         end
 
         function obj = calculateStateUDE_rot(obj, u_torque, q, omega, dt)
-            %obj.domega = obj.J\(obj.tau - cross(obj.omega, obj.J * obj.omega)) + obj.disturbance_rot;
-            controlVar_test = obj.J_ObserverBase * u_torque + cross(omega, obj.J_ObserverBase * omega);
-            [q_vec_0, q_vec_1, q_vec_2, q_vec_3] = parts(q);
-            x_r = [q_vec_1; q_vec_2; q_vec_3; omega];
+            controlVar_test = u_torque - cross(omega, obj.J_ObserverBase * omega);
+            q.normalize();
+            q_vec = rotvec(q)';
+            x_r = [q_vec; omega];
+            % [q_vec_0, q_vec_1, q_vec_2, q_vec_3] = parts(q);
+            % x_r = [q_vec_1; q_vec_2; q_vec_3; omega];
             xi_dot_rot = -obj.Omega_UDE_rot * obj.xi_UDE_rot - (obj.Omega_UDE_rot^2 * (obj.B_pinv_rot * x_r) + obj.Omega_UDE_rot * (obj.B_pinv_rot * obj.A_rot * x_r)) - obj.Omega_UDE_rot * (controlVar_test);
             obj.xi_UDE_rot = obj.xi_UDE_rot + dt * xi_dot_rot;
             obj.w_hat_rot = obj.xi_UDE_rot + obj.Omega_UDE_rot * obj.B_pinv_rot * x_r;

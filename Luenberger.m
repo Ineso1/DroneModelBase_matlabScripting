@@ -62,10 +62,13 @@ classdef Luenberger < ObserverBase & handle
         end
 
         function obj = calculateDisturbanceL_rot(obj, u_torque, q, omega, dt)
-            q_vec = [q.q1; q.q2; q.q3; q.q4];  % Include q4 (scalar part of the quaternion)
+            q.normalize();
+            q_vec = rotvec(q)';
             x_r = [q_vec; omega; zeros(6, 1)];
+            % [q_vec_0, q_vec_1, q_vec_2, q_vec_3] = parts(q);
+            % x_r = [q_vec_1; q_vec_2; q_vec_3; omega; zeros(6, 1)];
             y = obj.C_ext_rot * x_r;
-            obj.dx_hat_rot = obj.A_ext_rot * obj.x_hat_ext_L_rot + obj.B_ext_rot * u_torque + obj.L_ext_rot * (y - obj.C_ext_rot * obj.x_hat_ext_L_rot);
+            obj.dx_hat_rot = obj.A_ext_rot * obj.x_hat_ext_L_rot + obj.B_ext_rot * (u_torque - cross(omega, obj.J_ObserverBase * omega)) + obj.L_ext_rot * (y - obj.C_ext_rot * obj.x_hat_ext_L_rot);
             obj.x_hat_ext_L_rot = obj.x_hat_ext_L_rot + dt * obj.dx_hat_rot;
             obj.w_hat_rot = obj.x_hat_ext_L_rot(7:9);
         end
