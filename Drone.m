@@ -32,6 +32,10 @@ classdef Drone < DroneDynamic
         KalmanFilter
 
         obs_num
+        disturbanceRejection_trans
+        disturbanceRejection_rot
+        rejection_trans
+        rejection_rot
 
         % Gaussian error properties
         noiseRangeMin
@@ -68,6 +72,12 @@ classdef Drone < DroneDynamic
             obj.SuperTwist_obs = SuperTwistEstimator(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
             obj.SlidingMode_obs = SlidingModeEstimator(obj.mass, obj.J, obj.p, obj.dp, obj.q, obj.omega);
 
+            obj.disturbanceRejection_trans = diag([1,1,1]);
+            obj.disturbanceRejection_rot = diag([1,1,1]);
+
+            obj.rejection_trans = [0;0;0];
+            obj.rejection_rot = [0;0;0];
+
             obj.noiseRangeMin = -1.5;
             obj.noiseRangeMax = 1.5;
             obj.noiseMean = 0;
@@ -103,12 +113,34 @@ classdef Drone < DroneDynamic
 
             if obj.obs_num == 1
             obj.UDE_obs.calculateStateUDE_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
+            obj.UDE_obs.calculateStateUDE_rot(obj.u_torque, obj.q, obj.omega, obj.dt);
+            obj.rejection_trans = obj.disturbanceRejection_trans * obj.UDE_obs.w_hat_trans;
+            obj.rejection_rot = obj.disturbanceRejection_rot * obj.UDE_obs.w_hat_rot;
             elseif obj.obs_num == 2
             obj.Luenberger_obs.calculateDisturbanceL_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
+            obj.Luenberger_obs.calculateDisturbanceL_rot(obj.u_torque, obj.q, obj.omega, obj.dt);
+            obj.rejection_trans = obj.disturbanceRejection_trans * obj.Luenberger_obs.w_hat_trans;
+            obj.rejection_rot = obj.disturbanceRejection_rot * obj.Luenberger_obs.w_hat_rot;
             elseif obj.obs_num == 3
             obj.SuperTwist_obs.calculateDisturbanceST_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);
+            obj.SuperTwist_obs.calculateDisturbanceST_rot(obj.u_torque, obj.q, obj.omega, obj.dt);
+            obj.rejection_trans = obj.disturbanceRejection_trans * obj.SuperTwist_obs.w_hat_trans;
+            obj.rejection_rot = obj.disturbanceRejection_rot * obj.SuperTwist_obs.w_hat_rot;
             elseif obj.obs_num == 4
             obj.SlidingMode_obs.calculateDisturbanceSM_trans(obj.u_thrust, obj.p, obj.dp, obj.dt);    
+            obj.SlidingMode_obs.calculateDisturbanceSM_rot(obj.u_torque, obj.q, obj.omega, obj.dt);
+            obj.rejection_trans = obj.disturbanceRejection_trans * obj.SlidingMode_obs.w_hat_trans;
+            obj.rejection_rot = obj.disturbanceRejection_rot * obj.SlidingMode_obs.w_hat_rot;
+            end
+
+            if any(isnan(obj.rejection_trans))
+                warning('rot contains NaN values. Resetting to zero.');
+                obj.rejection_trans = [0;0;0];
+            end
+
+            if any(isnan(obj.rejection_rot))
+                warning('rot contains NaN values. Resetting to zero.');
+                obj.rejection_rot = [0;0;0];
             end
 
             noise = obj.generateGaussianError(obj.noiseRangeMin, obj.noiseRangeMax, obj.noiseMean, obj.noiseStdDev);
@@ -125,7 +157,7 @@ classdef Drone < DroneDynamic
             if norm(obj.u_thrust)~=0
                 obj.u_thrust = obj.max_thrust * tanh(norm(obj.u_thrust) / obj.max_thrust) * obj.u_thrust / norm(obj.u_thrust);
             end
-            obj.u_thrust = obj.u_thrust - obj.kd_thrust_2 * obj.dp + [0; 0; obj.mass * obj.g];
+            obj.u_thrust = obj.u_thrust - obj.kd_thrust_2 * obj.dp + [0; 0; obj.mass * obj.g] - obj.rejection_trans;
             obj.F_bf = norm(obj.u_thrust);
 
             % Rotation control
