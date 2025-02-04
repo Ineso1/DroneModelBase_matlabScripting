@@ -52,7 +52,7 @@ droneSuperTwist = droneSuperTwist.setControlGains(4, 1, 2, 20, 2, 6);
 droneSuperTwist = droneSuperTwist.setAimPoint(1, 2, 3);
 droneSuperTwist = droneSuperTwist.setDisturbance([0; 0; 0], [0; 0; 0]);
 droneSuperTwist.disturbanceRejection_trans = diag([x_comp_trans,y_comp_trans,z_comp_trans]);
-droneSuperTwist.disturbanceRejection_rot = diag([0,0,0]);
+droneSuperTwist.disturbanceRejection_rot = diag([0,0,0.1]);
 
 for i = 1:iterations
     time = i * dt;

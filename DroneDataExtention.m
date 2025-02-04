@@ -103,6 +103,30 @@ classdef DroneDataExtention
             grid on;
         end
 
+         function plotOrientationError(obj)
+            orientation_euler = eulerd(quaternion(obj.q_array(1,:), obj.q_array(2,:), obj.q_array(3,:), obj.q_array(4,:)), 'ZYX', 'frame');
+            orientationDesire_euler = eulerd(quaternion(obj.q_d_array(1,:), obj.q_d_array(2,:), obj.q_d_array(3,:), obj.q_d_array(4,:)), 'ZYX', 'frame');
+            error = orientation_euler - orientationDesire_euler;
+            
+            figure;
+            plot(orientation_euler);
+            hold on;
+            plot(orientationDesire_euler);
+            title('Drone Orientation (Euler Angles) over Time');
+            xlabel('Time Step');
+            ylabel('Angle (degrees)');
+            legend('Yaw', 'Pitch', 'Roll');
+            grid on;
+
+            figure
+            plot(error);
+            title('Drone error');
+            xlabel('Time Step');
+            ylabel('Angle (degrees)');
+            legend('Yaw', 'Pitch', 'Roll');
+            grid on;
+        end
+
         function plotErrors(obj)
             figure;
             subplot(2,1,1);

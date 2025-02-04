@@ -157,7 +157,7 @@ classdef Drone < DroneDynamic
             if norm(obj.u_thrust)~=0
                 obj.u_thrust = obj.max_thrust * tanh(norm(obj.u_thrust) / obj.max_thrust) * obj.u_thrust / norm(obj.u_thrust);
             end
-            obj.u_thrust = obj.u_thrust - obj.kd_thrust_2 * obj.dp + [0; 0; obj.mass * obj.g] - obj.rejection_trans;
+            obj.u_thrust = obj.u_thrust - obj.kd_thrust_2 * obj.dp + [0; 0; obj.mass * obj.g];
             obj.F_bf = norm(obj.u_thrust);
 
             % Rotation control
@@ -178,7 +178,7 @@ classdef Drone < DroneDynamic
             if norm(obj.u_thrust)
                 obj.u_torque = obj.max_torque * tanh(norm(obj.u_torque)/obj.max_torque) * obj.u_torque/norm(obj.u_torque) - obj.kd_torque_2 * eomega;
             end
-            obj.tau = obj.J * obj.u_torque;
+            obj.tau = obj.J * obj.u_torque - 0*obj.rejection_rot;
         end
 
         function obj = updateDroneDataExtention(obj)
