@@ -1,3 +1,6 @@
+# Want to see if it works??
+run **`simObsComparation.m`** script
+
 # Quadrotor Simulation
 
 This repository contains classes to simulate the control, observers, or any dynamic behavior of a quadrotor. The simulation is designed with modularity in mind, allowing for easy extension and integration of new controllers, estimators, or observers.
