@@ -44,7 +44,7 @@ x0 = 0;
 y0 = 0;
 z0 = 0;
 dt = 0.01;
-sim_time = 8; % seconds
+sim_time = 15; % seconds
 iterations = sim_time / dt;
 
 drone = Drone(mass, q, x0, y0, z0, dt);
@@ -61,11 +61,15 @@ drone.disturbanceRejection_rot = diag([0,0,0]);
 
 for i = 1:iterations
     time = i * dt;
-    if time >= 2 && time <= 9
+    if time >= 4 
+        drone.disturbanceRejection_rot = diag([0.006,0.006,0.01]);
+    end
+    if time >= 5 && time <= 12
         
-        %disturbance_trans = [0.5 * sin(pi * (time - 2)); 1 * sin(pi * (time - 2)); 6 * sin(pi * (time - 2))];
+        disturbance_trans = [0.5 * sin(pi * (time - 2)); 1 * sin(pi * (time - 2)); 6 * sin(pi * (time - 2))];
         %disturbance_rot = [3.5 * sin(pi * (time - 2)); 2.5 * sin(pi * (time - 2)); 6.5 * sin(pi * (time - 2))];
-        disturbance_trans = [0;0;5];
+        %disturbance_rot = [0;0;1];
+        %disturbance_trans = [0;0;5];
         drone = drone.setDisturbance(disturbance_trans, disturbance_rot);
     else
         %drone = drone.setDisturbance([0; 0; 0], [0; 0; 0]); 
@@ -82,5 +86,7 @@ drone.plotErrors();
 %drone.plotOrientation();
 drone.plotDisturbance_trans();
 drone.plotDisturbance_rot();
+
+drone.plotOrientationError();
 %pause(3);
 %drone.animateDroneTrajectory();
