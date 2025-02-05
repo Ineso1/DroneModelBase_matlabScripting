@@ -3,7 +3,9 @@ classdef Drone < DroneDynamic
 
         % Translational vars
         p_d
+        dp_d
         ep
+        edp
 
         % Rotational vars
         q_d
@@ -49,8 +51,10 @@ classdef Drone < DroneDynamic
             obj@DroneDynamic(mass, q, x0, y0, z0, dt);
             obj.obs_num = 0;
             obj.p_d = [0; 0; 0;];
+            obj.dp_d = [0; 0; 0;];
             obj.q_d = quaternion(1, 0, 0, 0);
             obj.ep = [0; 0; 0;];
+            obj.edp = [0; 0; 0;];
             obj.eq = obj.q;
             
             % Initialize control vars and consts
@@ -143,27 +147,32 @@ classdef Drone < DroneDynamic
                 obj.rejection_rot = [0;0;0];
             end
 
-            noise = obj.generateGaussianError(obj.noiseRangeMin, obj.noiseRangeMax, obj.noiseMean, obj.noiseStdDev);
-            obj.p_noisy = obj.p + noise;
-
-            % Llamada al método para guardar los datos de p_noisy
-            obj.saveNoisyData('p_noisy.csv');
-
-            obj.KalmanFilter.kalman_estimate(obj.p_noisy, obj.dp, obj.u_thrust);
-
             % Translational control
             obj.ep = obj.p_d - obj.p;
-            obj.u_thrust = obj.kp_thrust * obj.ep - obj.kd_thrust_1 * obj.dp;
+            obj.edp = obj.dp_d - obj.dp;
+
+            obj.u_thrust = obj.kp_thrust * obj.ep + obj.kd_thrust_1 * obj.edp;
             if norm(obj.u_thrust)~=0
                 obj.u_thrust = obj.max_thrust * tanh(norm(obj.u_thrust) / obj.max_thrust) * obj.u_thrust / norm(obj.u_thrust);
             end
-            obj.u_thrust = obj.u_thrust - obj.kd_thrust_2 * obj.dp + [0; 0; obj.mass * obj.g];
+            obj.u_thrust = obj.u_thrust + [0; 0; obj.mass * obj.g] - obj.rejection_trans;
             obj.F_bf = norm(obj.u_thrust);
 
+            if obj.F_bf < 0
+                obj.F_bf = 0;
+            end
+
+            if norm(obj.F_bf) ~= 0
+                uz_uvec = obj.u_thrust / norm(obj.u_thrust); % unit vector on thrust force direction :)
+                obj.q_d = exp(0.5*log(quaternion([dot([0;0;1],uz_uvec);[cross([0;0;1],uz_uvec)]]')));
+                obj.q_d = normalize(obj.q_d);
+
+            else
+                obj.q_d = obj.q;
+                obj.q_d = normalize(obj.q_d);
+            end
+
             % Rotation control
-            uz_uvec = obj.u_thrust / norm(obj.u_thrust); % unit vector on thrust force direction :)
-            obj.q_d = exp(0.5*log(quaternion([dot([0;0;1],uz_uvec);[cross([0;0;1],uz_uvec)]]')));
-            obj.q_d = normalize(obj.q_d);
 
             obj.eq_prev = obj.eq;
             obj.eq = obj.q * (obj.q_d');
@@ -174,14 +183,18 @@ classdef Drone < DroneDynamic
                 obj.eq = (obj.q_d') * obj.q;
             end
 
-            obj.u_torque = -obj.kp_torque * rotvec(obj.eq)' - obj.kd_torque_1 * eomega;
-            if norm(obj.u_thrust)
-                obj.u_torque = obj.max_torque * tanh(norm(obj.u_torque)/obj.max_torque) * obj.u_torque/norm(obj.u_torque) - obj.kd_torque_2 * eomega;
+            obj.u_torque = -obj.kp_torque * rotvec(obj.eq)' - obj.kd_torque_1 * obj.omega;
+            if norm(obj.u_torque) ~= 0
+                obj.u_torque = obj.max_torque * tanh(norm(obj.u_torque)/obj.max_torque) * obj.u_torque/norm(obj.u_torque);
+            else
+                obj.u_torque = [0;0;0];
             end
-            obj.tau = obj.J * obj.u_torque - 0*obj.rejection_rot;
+            obj.tau = obj.J * obj.u_torque - obj.J * obj.rejection_rot;
         end
 
         function obj = updateDroneDataExtention(obj)
+            obj.thrust_array(:, obj.iterations + 1) = obj.F_bf;
+            obj.torque_array(:, obj.iterations + 1) = obj.tau;
             obj.ep_array(:, obj.iterations + 1) = obj.ep;
             obj.eq_array(:, obj.iterations + 1) = rotvec(obj.eq)';
             obj.p_array(:, obj.iterations + 1) = obj.p;

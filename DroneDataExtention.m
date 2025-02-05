@@ -4,6 +4,10 @@ classdef DroneDataExtention
         ep_array
         eq_array
 
+        % Control
+        thrust_array
+        torque_array
+
         % Dynamics
         p_array
         p_array_noisy
@@ -40,6 +44,8 @@ classdef DroneDataExtention
     end
     methods
         function obj = DroneDataExtention()
+            obj.thrust_array = [];
+            obj.torque_array = [];
             obj.ep_array = [];
             obj.eq_array = [];
             obj.p_array = [];
@@ -329,14 +335,14 @@ classdef DroneDataExtention
 
         function plotDisturbance_trans(obj)
             figure;
-            plot(obj.time_array, obj.disturbance_trans_array(1,:), 'r-', 'DisplayName', 'Disturbance X');
+            plot(obj.time_array, obj.disturbance_trans_array(1,:), 'r--', 'DisplayName', 'Disturbance X');
             hold on;
-            plot(obj.time_array, obj.disturbance_trans_array(2,:), 'g-', 'DisplayName', 'Disturbance Y');
-            plot(obj.time_array, obj.disturbance_trans_array(3,:), 'b-', 'DisplayName', 'Disturbance Z');
+            plot(obj.time_array, obj.disturbance_trans_array(2,:), 'g--', 'DisplayName', 'Disturbance Y');
+            plot(obj.time_array, obj.disturbance_trans_array(3,:), 'b--', 'DisplayName', 'Disturbance Z');
 
-            plot(obj.time_array, obj.disturbance_measure_trans(1,:), 'r*-', 'DisplayName', 'Disturbance Measured X');
-            plot(obj.time_array, obj.disturbance_measure_trans(2,:), 'g*-', 'DisplayName', 'Disturbance Measured Y');
-            plot(obj.time_array, obj.disturbance_measure_trans(3,:), 'b*-', 'DisplayName', 'Disturbance Measured Z');
+            plot(obj.time_array, obj.disturbance_measure_trans(1,:), 'r-', 'DisplayName', 'Disturbance Measured X');
+            plot(obj.time_array, obj.disturbance_measure_trans(2,:), 'g-', 'DisplayName', 'Disturbance Measured Y');
+            plot(obj.time_array, obj.disturbance_measure_trans(3,:), 'b-', 'DisplayName', 'Disturbance Measured Z');
             title('Disturbance trans Over Time');
             xlabel('Time (s)');
             ylabel('Disturbance');
@@ -346,14 +352,14 @@ classdef DroneDataExtention
 
         function plotDisturbance_rot(obj)
             figure;
-            plot(obj.time_array, obj.disturbance_rot_array(1,:), 'r-', 'DisplayName', 'Disturbance X');
+            plot(obj.time_array, obj.disturbance_rot_array(1,:), 'r--', 'DisplayName', 'Disturbance X');
             hold on;
-            plot(obj.time_array, obj.disturbance_rot_array(2,:), 'g-', 'DisplayName', 'Disturbance Y');
-            plot(obj.time_array, obj.disturbance_rot_array(3,:), 'b-', 'DisplayName', 'Disturbance Z');
+            plot(obj.time_array, obj.disturbance_rot_array(2,:), 'g--', 'DisplayName', 'Disturbance Y');
+            plot(obj.time_array, obj.disturbance_rot_array(3,:), 'b--', 'DisplayName', 'Disturbance Z');
 
-            plot(obj.time_array, obj.disturbance_measure_rot(1,:), 'r*-', 'DisplayName', 'Disturbance Measured X');
-            plot(obj.time_array, obj.disturbance_measure_rot(2,:), 'g*-', 'DisplayName', 'Disturbance Measured Y');
-            plot(obj.time_array, obj.disturbance_measure_rot(3,:), 'b*-', 'DisplayName', 'Disturbance Measured Z');
+            plot(obj.time_array, obj.disturbance_measure_rot(1,:), 'r-', 'DisplayName', 'Disturbance Measured X');
+            plot(obj.time_array, obj.disturbance_measure_rot(2,:), 'g-', 'DisplayName', 'Disturbance Measured Y');
+            plot(obj.time_array, obj.disturbance_measure_rot(3,:), 'b-', 'DisplayName', 'Disturbance Measured Z');
             title('Disturbance Rot Over Time');
             xlabel('Time (s)');
             ylabel('Disturbance');
@@ -391,6 +397,27 @@ classdef DroneDataExtention
             title('Position over Time');
             xlabel('Time');
             ylabel('Position');
+            legend('show');
+            grid on;
+        end
+
+        function plotControl(obj)
+            figure;
+            subplot(2,1,2);
+            plot(obj.time_array, obj.thrust_array(1,:), 'r-', 'DisplayName', 'thrust X');
+            hold on;    title('control');
+            xlabel('Time');
+            ylabel('thrust');
+            legend('show');
+            grid on;
+
+            subplot(2,1,1);
+            plot(obj.time_array, obj.torque_array(1,:), 'r-', 'DisplayName', 'torque');
+            hold on;
+            plot(obj.time_array, obj.torque_array(2,:), 'g-', 'DisplayName', 'torque');
+            plot(obj.time_array, obj.torque_array(3,:), 'b-', 'DisplayName', 'torque');
+            xlabel('Time');
+            ylabel('torque');
             legend('show');
             grid on;
         end

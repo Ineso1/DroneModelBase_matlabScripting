@@ -25,17 +25,17 @@ classdef SlidingModeEstimator < ObserverBase & handle
             L_trans = 4; % Upper bound of disturbance 
             L_rot = 5;   % Upper bound of disturbance
 
-            obj.epsilon_trans = 0.1;
-            obj.epsilon_rot = 0.1;
+            obj.epsilon_trans = 0.0001;
+            obj.epsilon_rot = 0.0001;
 
-            obj.tau_trans = 0.3;
-            obj.tau_rot = 0.01;
+            obj.tau_trans = 0.63;
+            obj.tau_rot = 0.3;
 
             obj.rho_trans = (L_trans + obj.epsilon_trans); 
             obj.rho_rot = L_rot + obj.epsilon_rot;     
 
-            obj.c_p_trans = 1;
-            obj.c_dp_trans = 1.2;
+            obj.c_p_trans = 10;
+            obj.c_dp_trans = 10.2;
             obj.c_q_rot = 10;
             obj.c_omega_rot = 10;
 

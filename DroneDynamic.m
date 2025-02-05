@@ -75,11 +75,11 @@ classdef DroneDynamic < DroneDataExtention
             [somethingWeDontCareAbout, ax, ay, az] = parts(obj.q * quaternion( 0, 0, 0, obj.F_bf/obj.mass) * (obj.q'));
             obj.ddp = [ax; ay; az] + obj.disturbance_trans;
             obj.dp = obj.dp + ([0; 0; -obj.g] +  obj.ddp) * obj.dt;
-            obj.domega = obj.J\(obj.tau - cross(obj.omega, obj.J * obj.omega)) + obj.disturbance_rot;
+            obj.domega = obj.J\(obj.tau - cross(obj.omega, obj.J * obj.omega));
             obj.dq = 0.5*quaternion([0,obj.omega'])*obj.q;
             obj.dx_sys_trans = [obj.dp; obj.ddp - obj.disturbance_trans];
             [dq_vec_0, dq_vec_1, dq_vec_2, dq_vec_3] = parts(obj.dq);
-            obj.dx_sys_rot = [dq_vec_1; dq_vec_2; dq_vec_3; obj.domega - obj.disturbance_rot];
+            obj.dx_sys_rot = [dq_vec_1; dq_vec_2; dq_vec_3; obj.domega];
 
             % X
             obj.p = obj.p + obj.dp * obj.dt + 0.5 * obj.ddp * obj.dt^2;
