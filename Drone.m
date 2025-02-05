@@ -147,6 +147,14 @@ classdef Drone < DroneDynamic
                 obj.rejection_rot = [0;0;0];
             end
 
+            noise = obj.generateGaussianError(obj.noiseRangeMin, obj.noiseRangeMax, obj.noiseMean, obj.noiseStdDev);
+            obj.p_noisy = obj.p + noise;
+
+            % Llamada al método para guardar los datos de p_noisy
+            obj.saveNoisyData('p_noisy.csv');
+
+            obj.KalmanFilter.kalman_estimate(obj.p_noisy, obj.dp, obj.u_thrust);
+
             % Translational control
             obj.ep = obj.p_d - obj.p;
             obj.edp = obj.dp_d - obj.dp;

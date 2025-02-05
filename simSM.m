@@ -36,8 +36,8 @@ for i = 1:iterations
         drone = drone.setAimPoint(1, 2, 2);
     end
     if time >= 6 && time <= 50
-        disturbance_trans = [4 * sin(pi * (time - 2)); 2 * sin(pi * (time - 2)); 3 * sin(pi * (time - 2))];
-        %disturbance_trans = [1;2;5];
+        %disturbance_trans = [4 * sin(pi * (time - 2)); 2 * sin(pi * (time - 2)); 3 * sin(pi * (time - 2))];
+        disturbance_trans = [1;2;5];
         drone = drone.setDisturbance(disturbance_trans, disturbance_rot);
     else
         %drone = drone.setDisturbance([0; 0; 0], [0; 0; 0]); 
