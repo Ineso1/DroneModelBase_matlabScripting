@@ -31,6 +31,8 @@ classdef Drone < DroneDynamic
         SuperTwist_obs
         SlidingMode_obs
 
+        name
+
         KalmanFilter
 
         obs_num
@@ -47,7 +49,11 @@ classdef Drone < DroneDynamic
         p_noisy
     end
     methods
-        function obj = Drone(mass, q, x0, y0, z0, dt)
+        function obj = Drone(mass, q, x0, y0, z0, dt, name)
+            if (nargin < 7)
+                name = 'standard';
+            end
+
             obj@DroneDynamic(mass, q, x0, y0, z0, dt);
             obj.obs_num = 0;
             obj.p_d = [0; 0; 0;];
@@ -56,6 +62,7 @@ classdef Drone < DroneDynamic
             obj.ep = [0; 0; 0;];
             obj.edp = [0; 0; 0;];
             obj.eq = obj.q;
+            obj.name = name;
             
             % Initialize control vars and consts
             obj.u_thrust = [0; 0; 0];
