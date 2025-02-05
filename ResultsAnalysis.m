@@ -192,8 +192,6 @@ classdef ResultsAnalysis
                 dt(i) = mean(diff(obj.set_simulations(i).time_array));
             end
 
-            temp = cumsum(abs(obj.set_simulations(1).ep_array(1,:)).*dt(1))';
-            size(temp)
             % Compute the norms
             for i = 1:obj.num_simulations
                     obj.norms.iae(:,i) = cumsum(sum(abs(obj.set_simulations(i).ep_array),1).*dt(i))';
@@ -201,15 +199,22 @@ classdef ResultsAnalysis
                     obj.norms.itae(:,i) = cumsum(obj.set_simulations(i).time_array.*sum(abs(obj.set_simulations(i).ep_array),1).*dt(i))';
             end
             
-            % summary of computation
+            % Summary of computation
             for i = 1:obj.num_simulations
-                sprintf('Simulation: %s', obj.set_simulations(i).name)
-                sprintf('IAE: %f', obj.norms.iae(end,i))
-                sprintf('ISE: %f', obj.norms.ise(end,i))
-                sprintf('ITAE: %f', obj.norms.itae(end,i))
+                % Print final results. One message per simulation
+                fprintf('Simulation: %s\n', obj.set_simulations(i).name);
+                fprintf('IAE: %f\n', obj.norms.iae(end,i));
+                fprintf('ISE: %f\n', obj.norms.ise(end,i));
+                fprintf('ITAE: %f\n', obj.norms.itae(end,i));
+                
+                % Calculate mean error and covariance for each axis
+                [std_desviation, mean_error] = std(obj.set_simulations(i).ep_array, 0, 2);
+                
+                % Print the max/average of the errors across all axes
+                fprintf('Mean Error (average across axes): %f\n', abs(mean(mean_error)));
+                fprintf('Standard Deviation Error (max value across axes): %f\n', max(std_desviation));
+                fprintf('------------------------------------\n\n');
             end
-            
-
         end
     end
 
