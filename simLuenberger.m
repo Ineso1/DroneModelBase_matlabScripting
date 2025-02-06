@@ -30,14 +30,15 @@ for i = 1:iterations
     time = i * dt;
     if time >= 4 
         drone.disturbanceRejection_trans = diag([1,1,1]);
-        drone.disturbanceRejection_rot = diag([2,2,2]);
+        drone.disturbanceRejection_rot = diag([1,1,1]);
     end
     if time >= 5 
         drone = drone.setAimPoint(1, 2, 2);
     end
     if time >= 6 && time <= 50
-        %disturbance_trans = [4 * sin(pi * (time - 2)); 2 * sin(pi * (time - 2)); 3 * sin(pi * (time - 2))];
-        disturbance_trans = [1;2;5];
+        w = 0.3;
+        disturbance_trans = [1 * sin(w * time); 2 * cos(w*time); 5 * sin(w*time)];
+        disturbance_rot = [0; 0; 0];
         drone = drone.setDisturbance(disturbance_trans, disturbance_rot);
     else
         %drone = drone.setDisturbance([0; 0; 0], [0; 0; 0]); 

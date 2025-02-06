@@ -37,14 +37,15 @@ classdef Luenberger < ObserverBase & handle
             obj.B_ext_rot = [obj.B_rot; zeros(6,3)];
             obj.C_ext_rot = [obj.C_rot, zeros(3,6)];
             
-            obj.desired_eigenvalues_trans = [-0.1, -0.1, -1, -0.5, -0.5, -2];
-            obj.desired_eigenvalues_ext_trans = [obj.desired_eigenvalues_trans, -0.7, -0.7, -3, -0.8, -0.8, -4];
+            obj.desired_eigenvalues_trans = [-0.5, -0.5, -1.5, -0.9, -0.9, -2.0];
+            obj.desired_eigenvalues_ext_trans = [obj.desired_eigenvalues_trans, -1.2, -1.2, -3.5, -1.5, -1.5, -4.5];
+
 
             obj.L_trans = place(obj.A_trans', obj.C_trans', obj.desired_eigenvalues_trans)';
             obj.L_ext_trans = place(obj.A_ext_trans', obj.C_ext_trans', obj.desired_eigenvalues_ext_trans)';
 
-            obj.desired_eigenvalues_rot = [-0.7, -0.7, -0.7, -0.8, -0.8, -0.8];
-            obj.desired_eigenvalues_ext_rot = [obj.desired_eigenvalues_rot, -0.9, -0.9, -0.9, -0.95, -0.95, -0.95];
+            obj.desired_eigenvalues_rot = [-1.0, -1.0, -1.0, -1.2, -1.2, -1.2];
+            obj.desired_eigenvalues_ext_rot = [obj.desired_eigenvalues_rot, -1.3, -1.3, -1.3, -1.5, -1.5, -1.5];
 
             obj.L_rot = place(obj.A_rot', obj.C_rot', obj.desired_eigenvalues_rot)';
             obj.L_ext_rot = place(obj.A_ext_rot', obj.C_ext_rot', obj.desired_eigenvalues_ext_rot)';
