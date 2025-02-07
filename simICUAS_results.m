@@ -120,3 +120,5 @@ simulations = [normal, luenberger, trans, rot];
 % Compute evaluation and show results. 
 results = ResultsAnalysis(simulations, colors , print_settings);
 results.showNormComparison();
+
+close all

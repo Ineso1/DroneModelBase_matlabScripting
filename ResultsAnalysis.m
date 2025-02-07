@@ -18,6 +18,10 @@ classdef ResultsAnalysis
 
         line_width = 1.5;
         line_width_ref = 1.5;
+        ylabel_size = 14;
+        xlabel_size = 14;
+        title_size = 13;
+        legend_size = 12;
 
         size_figure = struct('width', 20, 'height', 20);
     end
@@ -61,14 +65,16 @@ classdef ResultsAnalysis
             grid minor;
             for i = 1:obj.num_simulations
                 plot(obj.set_simulations(i).time_array, vecnorm(obj.set_simulations(i).torque_array)', 'Color', obj.color_simulations(i), 'LineWidth', obj.line_width);
-                
             end
 
-            legend(obj.legends,'interpreter','latex','Location','northoutside','Orientation','horizontal');
-            xlabel(obj.xlabel_value,'interpreter','latex');
-            ylabel('Torques','interpreter','latex');
-            title(obj.standard_subtitles(1),'interpreter','latex');
-            %yscale('log');
+            legendhandle = legend(obj.legends,'interpreter','latex','Location','northoutside','Orientation','horizontal');
+            xhandle = xlabel(obj.xlabel_value,'interpreter','latex');
+            yhandle = ylabel('Torques norm [N$\cdot$m]','interpreter','latex');
+            title_handle = title(obj.standard_subtitles(1),'interpreter','latex');
+            set(xhandle, 'FontSize', obj.xlabel_size);
+            set(yhandle, 'FontSize', obj.ylabel_size);
+            set(title_handle, 'FontSize', obj.title_size);
+            set(legendhandle, 'FontSize', obj.legend_size);
 
             % Show the error norm
             subplot(3,1,2);
@@ -77,9 +83,12 @@ classdef ResultsAnalysis
             for i = 1:obj.num_simulations
                 plot(obj.set_simulations(i).time_array, vecnorm(obj.set_simulations(i).ep_array)', 'Color',  obj.color_simulations(i), 'LineWidth', obj.line_width);
             end
-            xlabel(obj.xlabel_value,'interpreter','latex');
-            ylabel('Error','interpreter','latex');
-            title(obj.standard_subtitles(2),'interpreter','latex');
+            xhandle = xlabel(obj.xlabel_value,'interpreter','latex');
+            yhandle = ylabel('Error norm [m]','interpreter','latex');
+            title_handle = title(obj.standard_subtitles(2),'interpreter','latex');
+            set(xhandle, 'FontSize', obj.xlabel_size);
+            set(yhandle, 'FontSize', obj.ylabel_size);
+            set(title_handle, 'FontSize', obj.title_size);
 
             % Show thrust value
             subplot(3,1,3);
@@ -88,9 +97,12 @@ classdef ResultsAnalysis
             for i = 1:obj.num_simulations
                 plot(obj.set_simulations(i).time_array, obj.set_simulations(i).thrust_array, 'Color',  obj.color_simulations(i), 'LineWidth', obj.line_width);
             end
-            xlabel(obj.xlabel_value,'interpreter','latex');
-            ylabel('Thrust','interpreter','latex');
-            title(obj.standard_subtitles(3),'interpreter','latex');
+            xhandle = xlabel(obj.xlabel_value,'interpreter','latex');
+            yhandle = ylabel('Thrust [N]','interpreter','latex');
+            title_handle = title(obj.standard_subtitles(3),'interpreter','latex');
+            set(xhandle, 'FontSize', obj.xlabel_size);
+            set(yhandle, 'FontSize', obj.ylabel_size);
+            set(title_handle, 'FontSize', obj.title_size);
 
             if obj.print_settings.save
                 print(gcf, strcat(obj.print_settings.path, 'general_comparison', obj.print_settings.code, '.pdf'), '-dpdf', '-r500', '-bestfit');
@@ -105,12 +117,16 @@ classdef ResultsAnalysis
                 for j = 1:obj.num_simulations
                     plot(obj.set_simulations(j).time_array, obj.set_simulations(j).eq_array(i,:), 'Color',  obj.color_simulations(j), 'LineWidth', obj.line_width);
                 end
-                xlabel(obj.xlabel_value,'interpreter','latex');
-                ylabel(string(titles(i)),'interpreter','latex');
-                title(obj.standard_subtitles(i),'interpreter','latex');
+                xhandle = xlabel(obj.xlabel_value,'interpreter','latex');
+                yhandle = ylabel(string(titles(i)),'interpreter','latex');
+                title_handle = title(obj.standard_subtitles(i),'interpreter','latex');
+                set(xhandle, 'FontSize', obj.xlabel_size);
+                set(yhandle, 'FontSize', obj.ylabel_size);
+                set(title_handle, 'FontSize', obj.title_size);
                 
                 if i == 1
-                    legend(obj.legends,'interpreter','latex','Location','northoutside','Orientation','horizontal');
+                    legendhandle = legend(obj.legends,'interpreter','latex','Location','northoutside','Orientation','horizontal');
+                    set(legendhandle, 'FontSize', obj.legend_size);
                 end
             end
 
@@ -119,7 +135,7 @@ classdef ResultsAnalysis
             end
 
             figure(units = "centimeters", Position = [0, 0, obj.size_figure.width, obj.size_figure.height]);
-            titles = {'X translational coordinate','Y translational coordinate','Z translational coordinate'};
+            titles = {'X coordinate [m]','Y coordinate [m]','Z coordinate [m]'};
             for i = 1:3    
                 subplot(3,1,i)     
                 hold on;
@@ -128,12 +144,16 @@ classdef ResultsAnalysis
                     plot(obj.set_simulations(i).time_array, obj.set_simulations(j).p_array(i,:), 'Color',  obj.color_simulations(j), 'LineWidth', obj.line_width);
                 end
                 yline(obj.set_simulations(1).p_d_array(i,end), 'k:', 'HandleVisibility','off',  'LineWidth', obj.line_width_ref);
-                xlabel(obj.xlabel_value,'interpreter','latex');
-                ylabel(titles(i),'interpreter','latex');
-                title(obj.standard_subtitles(i),'interpreter','latex');
+                xhandle = xlabel(obj.xlabel_value,'interpreter','latex');
+                yhandle = ylabel(titles(i),'interpreter','latex');
+                title_handle = title(obj.standard_subtitles(i),'interpreter','latex');
+                set(xhandle, 'FontSize', obj.xlabel_size);
+                set(yhandle, 'FontSize', obj.ylabel_size);
+                set(title_handle, 'FontSize', obj.title_size);
                 
                 if i == 1
-                    legend(obj.legends,'interpreter','latex','Location','northoutside','Orientation','horizontal');
+                    legendhandle = legend(obj.legends,'interpreter','latex','Location','northoutside','Orientation','horizontal');
+                    set(legendhandle, 'FontSize', obj.legend_size);
                 end
             end
 
@@ -150,10 +170,14 @@ classdef ResultsAnalysis
             for i = 1:obj.num_simulations
                 plot(obj.set_simulations(i).time_array, obj.norms.iae(:,i), 'Color',  obj.color_simulations(i), 'LineWidth', obj.line_width);
             end
-            legend(obj.legends,'interpreter','latex','Location','northoutside','Orientation','horizontal');
-            xlabel(obj.xlabel_value,'interpreter','latex');
-            ylabel('IAE','interpreter','latex');
-            title(obj.standard_subtitles(1),'interpreter','latex');
+            legendhandle = legend(obj.legends,'interpreter','latex','Location','northoutside','Orientation','horizontal');
+            xhandle = xlabel(obj.xlabel_value,'interpreter','latex');
+            yhandle = ylabel('IAE [m]','interpreter','latex');
+            title_handle = title(obj.standard_subtitles(1),'interpreter','latex');
+            set(xhandle, 'FontSize', obj.xlabel_size);
+            set(yhandle, 'FontSize', obj.ylabel_size);
+            set(title_handle, 'FontSize', obj.title_size);
+            set(legendhandle, 'FontSize', obj.legend_size);
 
             subplot(3,1,2);
             hold on;
@@ -161,9 +185,12 @@ classdef ResultsAnalysis
             for i = 1:obj.num_simulations
                 plot(obj.set_simulations(i).time_array, obj.norms.ise(:,i), 'Color',  obj.color_simulations(i), 'LineWidth', obj.line_width);
             end
-            xlabel(obj.xlabel_value,'interpreter','latex');
-            ylabel('ISE','interpreter','latex');
-            title(obj.standard_subtitles(2),'interpreter','latex');
+            xhandle = xlabel(obj.xlabel_value,'interpreter','latex');
+            yhandle = ylabel('ISE [m$^2$]','interpreter','latex');
+            title_handle = title(obj.standard_subtitles(2),'interpreter','latex');
+            set(xhandle, 'FontSize', obj.xlabel_size);
+            set(yhandle, 'FontSize', obj.ylabel_size);
+            set(title_handle, 'FontSize', obj.title_size);
 
             subplot(3,1,3);
             hold on;
@@ -171,9 +198,12 @@ classdef ResultsAnalysis
             for i = 1:obj.num_simulations
                 plot(obj.set_simulations(i).time_array, obj.norms.itae(:,i), 'Color',  obj.color_simulations(i), 'LineWidth', obj.line_width);
             end
-            xlabel(obj.xlabel_value,'interpreter','latex');
-            ylabel('ITAE','interpreter','latex');
-            title(obj.standard_subtitles(3),'interpreter','latex');
+            xhandle = xlabel(obj.xlabel_value,'interpreter','latex');
+            yhandle = ylabel('ITAE [m$\cdot$s]','interpreter','latex');
+            title_handle = title(obj.standard_subtitles(3),'interpreter','latex');
+            set(xhandle, 'FontSize', obj.xlabel_size);
+            set(yhandle, 'FontSize', obj.ylabel_size);
+            set(title_handle, 'FontSize', obj.title_size);
 
             if obj.print_settings.save
                 print(gcf, strcat(obj.print_settings.path, 'norms', obj.print_settings.code, '.pdf'), '-dpdf', '-r500', '-bestfit');
