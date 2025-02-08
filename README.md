@@ -1,74 +1,71 @@
-# Want to see if it works??
-run **`simObsComparation.m`** script
+# DroneModelBase_matlabScripting
 
-# Quadrotor Simulation
+## Overview
 
-This repository contains classes to simulate the control, observers, or any dynamic behavior of a quadrotor. The simulation is designed with modularity in mind, allowing for easy extension and integration of new controllers, estimators, or observers.
+This repository contains MATLAB scripts and classes for simulating the dynamics, control, and observer behavior of a quadrotor. The simulation framework is modular, enabling easy extension and integration of new controllers, estimators, and observers.
+
+![Observer Comparison](ReadmeImages/CompObservers.png)
+
+## Features
+
+- Simulates quadrotor dynamics, including translational and rotational motion.
+- Implements a quaternion-based PD controller.
+- Modular design for adding custom controllers and observers.
+- Built-in scripts for comparing various observer techniques.
+- Data logging and result analysis for trajectory tracking and observer performance.
 
 ## Project Structure
 
-- **`Drone`**: This is the main class where the quadrotor's dynamics and control logic are implemented. It currently includes a quaternion-based PD controller.
-- **`DroneDynamic`**: Implements the physical dynamics of the quadrotor, including translational and rotational states.
-- **`DroneDataExtention`**: Handles data logging and visualization utilities, including arrays for storing simulation results and methods for plotting.
+```
+.
+├── Drone.m                    # Main class for quadrotor dynamics and control logic
+├── DroneDynamic.m             # Handles the physical dynamics of the quadrotor
+├── DroneDataExtention.m       # Data logging and visualization utilities
+├── ObserverBase.m             # Base class for implementing observers
+├── Kalman.m                   # Kalman Filter implementation
+├── Luenberger.m               # Luenberger Observer implementation
+├── SlidingModeEstimator.m     # Sliding Mode Observer implementation
+├── SuperTwistEstimator.m      # Super-Twist Observer implementation
+├── UDE.m                      # Uncertainity and Disturbance Estimator implementation
+├── SoftTrajectoryGenerator.m  # Trajectory generation class
+├── simObsComparation.m        # Script for comparing observer performance
+├── simDrone.m                 # Main simulation script for quadrotor dynamics
+├── simLuenberger.m            # Simulation script for Luenberger Observer
+├── simSM.m                    # Simulation script for Sliding Mode Observer
+├── simST.m                    # Simulation script for Super-Twist Observer
+├── simUDE.m                   # Simulation script for UDE Observer
+├── p_noisy.csv                # Sample noisy data for testing Kalman filter
+├── ResultsAnalysis.m          # Script for analyzing simulation results
+└── README.md                  # Project documentation
+```
 
-## How to Run the Simulation
+## How to Run the Simulations
 
-To simulate the quadrotor's behavior:
-1. Use the `Drone` class to define the quadrotor's initial conditions, control gains, and desired trajectory.
-2. Run the simulation using the `simDrone` script, which provides an example setup.
-3. The simulation will execute and generate plots for position, orientation, and errors.
+### 1. Compare Observer Performance
+Run the **`simObsComparation.m`** script to simulate and compare the performance of different observers.
+
+### 2. Simulate Specific Observers
+Use one of the following scripts to simulate the performance of individual observers:
+- `simLuenberger.m`
+- `simSM.m`
+- `simST.m`
+- `simUDE.m`
+
+### 3. General Quadrotor Simulation
+Run **`simDrone.m`** for a general simulation of quadrotor dynamics, control, and trajectory following.
 
 ## Adding Custom Modules
 
-### Extending the Controller or Observer
-To develop new modules:
-1. **Inherit from the `Drone` class**:
-   - Create a new class that extends `Drone`.
-   - Override methods as needed to implement your custom logic.
-2. **Modify the `Drone` class directly**:
-   - Update the existing `applyControl` or relevant methods.
+### Extending Controllers or Observers
+To implement new controllers or observers:
+1. Create a new class inheriting from the appropriate base class (`Drone` or `ObserverBase`).
+2. Override or implement methods for your custom logic.
 
 ### Adding New Plots
 To visualize additional data:
-1. Add a new array property in the `DroneDataExtention` class.
-2. Update the `updateDroneDataExtention` method in the `Drone` class to populate the new array.
-3. Implement a plotting method in the `DroneDataExtention` class to generate the desired visualization.
+1. Add a new property in `DroneDataExtention` for storing the data.
+2. Update the methods in `DroneDataExtention` to handle and plot the new data.
 
-## Current Features
+## Related Implementation
 
-- Quaternion-based PD controller.
-- Disturbance handling for both translational and rotational dynamics.
-- Modular design for ease of extension.
-- Built-in methods to plot:
-  - Position trajectory.
-  - Orientation errors.
-  - Observer states (if applicable).
-
-## Example Usage
-
-The entry point for the simulation is the `Drone` class. You can set up a simulation as follows:
-
-```matlab
-mass = 0.405;
-q = quaternion(1, 0, 0, 0);
-x0 = 0; y0 = 0; z0 = 0;
-dt = 0.01;
-
-% Initialize Drone
-drone = Drone(mass, q, x0, y0, z0, dt);
-drone = drone.setControlGains(4, 1, 2, 20, 2, 6);
-drone = drone.setAimPoint(1, 2, 3);
-
-% Run simulation
-sim_time = 8; % seconds
-iterations = sim_time / dt;
-for i = 1:iterations
-    drone = drone.update();
-end
-
-% Plot results
-drone.plotPosition();
-drone.plotErrors();
-drone.plotOrientation();
-drone.animateDroneTrajectory();
-```
+This simulation framework is designed to complement the **[SimpleControl](https://github.com/Ineso1/SimpleControl)** repository, which provides a real-time implementation of quadrotor control and observer logic using C++ and the FL-AIR framework.
