@@ -19,9 +19,8 @@ This repository contains MATLAB scripts and classes for simulating the dynamics,
 
 Watch the following video to see the drone control in action:
 
-[![Aerial Tracking of a Ground Vehicle Using a Multirotor Drone](https://www.youtube.com/watch?v=vqDC104RrXA)](https://www.youtube.com/watch?v=vqDC104RrXA)
+[![Aerial Tracking of a Ground Vehicle Using a Multirotor Drone](https://img.youtube.com/vi/vqDC104RrXA/maxresdefault.jpg)](https://www.youtube.com/watch?v=vqDC104RrXA)
 
-https://www.youtube.com/watch?v=vqDC104RrXA
 
 ## Project Structure
 
