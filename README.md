@@ -14,6 +14,15 @@ This repository contains MATLAB scripts and classes for simulating the dynamics,
 - Built-in scripts for comparing various observer techniques.
 - Data logging and result analysis for trajectory tracking and observer performance.
 
+
+## Demo Video
+
+Experience the motor control in action:  
+**[TimesTech](https://www.youtube.com/watch?v=vqDC104RrXA)**  
+
+[![Motor Control Demo](https://img.youtube.com/vi/vqDC104RrXA/maxresdefault.jpg)](https://www.youtube.com/watch?v=vqDC104RrXA)
+
+
 ## Project Structure
 
 ```
